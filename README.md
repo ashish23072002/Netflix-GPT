@@ -4,6 +4,7 @@
 - npm install tailwindcss @tailwindcss/vite 
 - Ref [Link](https://tailwindcss.com/docs/installation/using-vite) for intall tailwindcss in vite 
 - npm i -D react-router-dom
+- Using Formik
 
 - Header
 - Login form
