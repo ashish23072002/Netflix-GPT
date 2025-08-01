@@ -9,7 +9,10 @@
 - Header
 - routing of app
 - Login form /Signup from
-- Form Validation and **UseRef**wwww
+- Form Validation and **UseRef**
+- Firebase Setup 
+- Deploying App to Producation 
+- Create signup user in firebase 
 
 
 ## Features
