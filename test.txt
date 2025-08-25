@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wookanizer - Bug Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Symbols:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <?!= include('style'); ?>
+</head>
+
+<body>
+
+  <div class="dashboard-header">
+    <div class="container">
+      <div class="row">
+        <div class="col-10">
+          <h1 class="dashboard-title">
+            <i class="fas fa-tachometer-alt me-3"></i>
+            The Bug Zone
+          </h1>
+          <p class="dashboard-subtitle">
+            Monitor and manage all your bugs and issues in one place
+          </p>
+          <button class="btn-custom" id="backButton" onclick="loadHome()">
+          <i class="fas fa-arrow-left"></i>
+          Back to Main Content
+        </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container my-5">
+    <!-- Stats Cards -->
+    <!-- <div class="row mb-5">
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="feature-icon mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
+              <i class="fas fa-bug"></i>
+            </div>
+            <h3 class="stat-number" id="dashboardTotalBugs">0</h3>
+            <p class="stat-label">Total Bugs</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="feature-icon mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="stat-number text-danger" id="dashboardHighPriority">0</h3>
+            <p class="stat-label">High Priority</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="feature-icon mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="stat-number text-success" id="dashboardResolved">0</h3>
+            <p class="stat-label">Resolved</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="feature-icon mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+              <i class="fas fa-hourglass-half"></i>
+            </div>
+            <h3 class="stat-number text-primary" id="dashboardInProgress">0</h3>
+            <p class="stat-label">In Progress</p>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- Filters Section -->
+    <div class="filter-section">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="filter-title mb-0">
+          <i class="fas fa-filter me-2"></i>
+          Filters
+        </h5>
+
+        <!-- Buttons moved to top right corner -->
+        <div class="d-flex gap-2">
+          <!-- Clear Button - Symbol only -->
+          <button id="clearFilters" class="clear-filters" title="Clear Filters"
+          onmouseover="this.style.background='#f0f4fc'"
+          onmouseout="this.style.background='white'"
+          onclick="clearFilters()"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+
+          <!-- Refresh Button - Symbol only -->
+          <button id="refreshData" class= "refresh-data" title="Refresh Data"
+          onmouseover="this.style.opacity='0.9'"
+          onmouseout="this.style.opacity='1'"
+          onclick="loadBugs()"
+        >
+          <i class="fas fa-sync-alt"></i>
+        </button>
+        </div>
+      </div>
+
+      <div class="row gx-2 gy-2 align-items-end">
+        <div class="col-md-2">
+          <label class="form-label small mb-1">Priority</label>
+          <select class="form-select form-select-sm" id="priorityFilter" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="P0">P0</option>
+          <option value="P1">P1</option>
+          <option value="P2">P2</option>
+          <option value="P3">P3</option>
+        </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small mb-1">Status</label>
+          <select class="form-select form-select-sm" onchange="applyFilters()" id="statusFilter">
+          <option value="">All</option>
+          <option value="ASSIGNED">Assigned</option>
+          <option value="In-Progress">In Progress</option>
+          <option value="ACCEPTED">Accepted</option>
+          <option value="FIXED">Fixed</option>
+        </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small mb-1" for="assigneeFilter">Assignee</label>
+          <select class="form-select form-select-sm" id="assigneeFilter" onchange="applyFilters()">
+        <option value="">All</option>
+      </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small mb-1">Severity</label>
+          <select class="form-select form-select-sm" id="severityFilter" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="S0">S0</option>
+          <option value="S1">S1</option>
+          <option value="S2">S2</option>
+          <option value="S3">S3</option>
+        </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small mb-1" >Vertical</label>
+          <select class="form-select form-select-sm" onchange="applyFilters()" id="verticalFilter">
+          <option value="">All</option>
+        </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small mb-1" for="searchInput">Search</label>
+          <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="Search..." onchange="applyFilters()">
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Bug List -->
+    <div class="row">
+      <div class="col-12">
+        <div id="bugList" class="bug-list">
+          <!-- Bug cards will be populated here -->
+        </div>
+
+        <div id="loadingSpinner" class="text-center my-5" style="display: none;">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Loading bugs...</p>
+        </div>
+
+        <div id="noBugsMessage" class="text-center my-5" style="display: none;">
+          <i class="fas fa-bug fa-3x text-muted mb-3"></i>
+          <h5 class="text-muted">No bugs found</h5>
+          <p class="text-muted">Try adjusting your filters or refresh the data</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Bug Detail Modal -->
+  <div class="modal fade" id="bugDetailModal" tabindex="-1" aria-labelledby="bugDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content custom-bug-modal">
+        <div class="modal-header">
+          <h6 class="modal-title" id="bugDetailModalLabel">🐞 Bug Details</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body scrollable-modal-body small" id="bugDetailContent">
+          <div class="bug-detail-item">
+            <span class="label">Title:</span>
+            <span id="bugTitle">Crash on login</span>
+          </div>
+          <div class="bug-detail-item">
+            <span class="label">Description:</span>
+            <span id="bugDescription">
+            Long description goes here... Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed a fermentum velit.
+            (repeat content for testing scroll)
+          </span>
+          </div>
+          <!-- Add more fields as needed -->
+
+          <!-- Hidden Quick Action Panel -->
+        </div>
+        <div class="modal-footer py-2">
+          <button type="button" class="btn btn-sm btn-primary" onclick="editBug()">Edit</button>
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <!-- <?!= include('dashboard-script'); ?> -->
+</body>
+
+</html>
+
+
+
+
+<script>
+  let allBugs = [];
+  let filteredBugs = [];
+  let currentSort = 'createdTime';
+  let sortDirection = 'desc';
+
+  // Initialize dashboard
+  document.addEventListener('DOMContentLoaded', function() {
+    loadBugs();
+    setupEventListeners();
+    document.getElementById('editCustomFieldButton').addEventListener('click', editCustomField);
+
+  });
+
+  function setupEventListeners() {
+    // Filter buttons
+    document.getElementById('applyFilters').addEventListener('click', applyFilters);
+    document.getElementById('applyFilters').addEventListener('onChange', applyFilters);
+    document.getElementById('clearFilters').addEventListener('click', clearFilters);
+    document.getElementById('refreshData').addEventListener('click', loadBugs);
+
+    // Search input
+    document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));
+
+    // Sort dropdown
+    document.querySelectorAll('[data-sort]').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        sortBugs(this.dataset.sort);
+      });
+    });
+  }
+
+  async function loadBugs() {
+    showLoading(true);
+    
+    // Call your Apps Script function
+    await google.script.run
+      .withSuccessHandler(onBugsLoaded)
+      .withFailureHandler(onBugsLoadError)
+      .getBugs();
+  }
+
+  function onBugsLoaded(result) {
+  
+      allBugs = JSON.parse(result) || [];
+      filteredBugs = [...allBugs];
+      populateFilterDropdowns();
+      // updateStats();
+      sortBugs(currentSort);
+      showLoading(false);
+    
+  }
+
+  function onBugsLoadError(error) {
+    console.error('Error loading bugs:', error);
+    showLoading(false);
+    showError('Failed to load bugs. Please try again.');
+  }
+
+  function populateFilterDropdowns() {
+    // Populate assignee filter
+    const assignees = [...new Set(allBugs.map(bug => bug.assignee).filter(Boolean))];
+    const assigneeFilter = document.getElementById('assigneeFilter');
+    assigneeFilter.innerHTML = '<option value="">All Assignees</option>';
+    assignees.forEach(assignee => {
+      assigneeFilter.innerHTML += `<option value="${assignee}">${assignee}</option>`;
+    });
+
+    // Populate vertical filter
+    const verticals = [...new Set(allBugs.map(bug => bug.vertical).filter(Boolean))];
+    const verticalFilter = document.getElementById('verticalFilter');
+    verticalFilter.innerHTML = '<option value="">All Verticals</option>';
+    verticals.forEach(vertical => {
+      verticalFilter.innerHTML += `<option value="${vertical}">${vertical}</option>`;
+    });
+  }
+
+  function updateStats() {
+    const totalBugs = allBugs.length;
+    const highPriority = allBugs.filter(bug => bug.priority === 'high').length;
+    const resolved = allBugs.filter(bug => bug.status === 'resolved' || bug.status === 'closed').length;
+    const inProgress = allBugs.filter(bug => bug.status === 'in-progress').length;
+
+    document.getElementById('dashboardTotalBugs').textContent = totalBugs;
+    document.getElementById('dashboardHighPriority').textContent = highPriority;
+    document.getElementById('dashboardResolved').textContent = resolved;
+    document.getElementById('dashboardInProgress').textContent = inProgress;
+  }
+
+  function applyFilters() {
+    const priority = document.getElementById('priorityFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    const assignee = document.getElementById('assigneeFilter').value;
+    const severity = document.getElementById('severityFilter').value;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const vertical = document.getElementById('verticalFilter').value;
+
+    filteredBugs = allBugs.filter(bug => {
+      return (!priority || bug.priority === priority) &&
+             (!status || bug.status === status) &&
+             (!assignee || bug.assignee === assignee) &&
+             (!severity || bug.severity === severity) &&
+             (!vertical || bug.vertical === vertical) &&
+             (!search || bug.title.toLowerCase().includes(search) || 
+              (bug.description && bug.description.toLowerCase().includes(search)));
+    });
+
+    sortBugs(currentSort);
+  }
+
+  function clearFilters() {
+    document.getElementById('priorityFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('assigneeFilter').value = '';
+    document.getElementById('severityFilter').value = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('verticalFilter').value = '';
+    
+    filteredBugs = [...allBugs];
+    sortBugs(currentSort);
+  }
+
+  function sortBugs(sortBy) {
+    if (currentSort === sortBy) {
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      currentSort = sortBy;
+      sortDirection = 'desc';
+    }
+
+    filteredBugs.sort((a, b) => {
+      let aVal = a[sortBy];
+      let bVal = b[sortBy];
+
+      if (sortBy === 'createdTime' || sortBy === 'modifiedTime') {
+        aVal = new Date(aVal);
+        bVal = new Date(bVal);
+      }
+
+      if (sortDirection === 'asc') {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
+
+    renderBugs();
+  }
+
+  function renderBugs() {
+    const bugList = document.getElementById('bugList');
+    // const bugCount = document.getElementById('bugCount');
+    const noBugsMessage = document.getElementById('noBugsMessage');
+
+    // bugCount.textContent = filteredBugs.length;
+
+    if (filteredBugs.length === 0) {
+      bugList.innerHTML = '';
+      noBugsMessage.style.display = 'block';
+      return;
+    }
+
+    noBugsMessage.style.display = 'none';
+
+    const bugsHTML = filteredBugs.map(bug => `
+      <div class="bug-card priority-${bug.priority}" onclick="showBugDetail('${bug.id}')">
+        <div class="bug-header">
+          <div class="bug-title">${bug.title}</div>
+          <span class="bug-id">#${bug.id}</span>
+        </div>
+        
+        <div class="bug-meta">
+          <div class="bug-meta-item">
+            <i class="fas fa-user"></i>
+            <strong>Assignee:</strong> ${bug.assignee || 'Unassigned'}
+          </div>
+          <div class="bug-meta-item">
+            <i class="fas fa-calendar"></i>
+            <strong>ETA:</strong> ${bug.eta || 'Not set'}
+          </div>
+        </div>
+        
+        <div class="bug-tags">
+          <span class="bug-tag tag-status">${bug.status}</span>
+          <span class="bug-tag tag-priority">${bug.priority}</span>
+          <span class="bug-tag tag-severity">${bug.severity}</span>
+          ${bug.vertical ? `<span class="bug-tag" style="background: var(--dark-gradient); color: white;">${bug.vertical}</span>` : ''}
+        </div>
+      </div>
+    `).join('');
+
+    bugList.innerHTML = bugsHTML;
+  }
+
+  function showBugDetail(bugId) {
+    const bug = allBugs.find(b => b.id === bugId);
+    if (!bug) return;
+
+    const modalContent = document.getElementById('bugDetailContent');
+    modalContent.innerHTML = `
+      <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-11">
+          <div class="mb-4">
+            <h4 class="mb-2">${bug.title}</h4>
+            <p class="text-muted mb-3">Bug ID: #${bug.id}</p>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6 mb-2">
+              <div class="d-flex align-items-center">
+                <strong class="me-2">Priority:</strong>
+                <span class="badge bg-${getPriorityColor(bug.priority)}">${bug.priority}</span>
+              </div>
+            </div>
+            <div class="col-md-6 mb-2">
+              <div class="d-flex align-items-center">
+                <strong class="me-2">Status:</strong>
+                <span class="badge bg-${getStatusColor(bug.status)}">${bug.status}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6 mb-2">
+              <strong>Severity:</strong> <span class="ms-1">${bug.severity}</span>
+            </div>
+            <div class="col-md-6 mb-2">
+              <strong>Type:</strong> <span class="ms-1">${bug.type}</span>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6 mb-2">
+              <strong>Assignee:</strong> <span class="ms-1">${bug.assignee || 'Unassigned'}</span>
+            </div>
+            <div class="col-md-6 mb-2">
+              <strong>Reporter:</strong> <span class="ms-1">${bug.reporter || 'Unknown'}</span>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6 mb-2">
+              <strong>Verifier:</strong> <span class="ms-1">${bug.verifier || 'Not assigned'}</span>
+            </div>
+            <div class="col-md-6 mb-2">
+              <strong>Vertical:</strong> <span class="ms-1">${bug.vertical || 'Not specified'}</span>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6 mb-2">
+              <strong>ETA:</strong> <span class="ms-1">${bug.eta || 'Not set'}</span>
+            </div>
+            <div class="col-md-6 mb-2">
+              <strong>Project Status:</strong> <span class="ms-1">${bug.project_status || 'Not specified'}</span>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6 mb-2">
+              <strong>Created:</strong> <span class="ms-1">${formatDate(bug.createdTime)}</span>
+            </div>
+            <div class="col-md-6 mb-2">
+              <strong>Modified:</strong> <span class="ms-1">${formatDate(bug.modifiedTime)}</span>
+            </div>
+          </div>
+
+          ${bug.collaborators && bug.collaborators.length > 0 ? `
+          <div class="mb-3">
+            <strong>Collaborators:</strong>
+            <div class="mt-2">
+              ${bug.collaborators.map(collab => {
+                const cleanedCollab = collab.replace('@google.com', '');
+                return `<span class="badge bg-secondary me-1">${cleanedCollab}</span>`;
+              }).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+          ${bug.lastComment ? `
+            <div class="mb-3">
+              <strong>Last Comment:</strong>
+              <div class="mt-2 p-3 bg-light border rounded small text-muted">
+                ${renderMarkdownSafe(bug.lastComment)}
+              </div>
+            </div>
+          ` : ''}
+
+          ${bug.blocking && bug.blocking.length > 0 ? `
+            <div class="mb-3">
+              <strong>Blocking:</strong>
+              <div class="mt-2">
+                ${bug.blocking.map(block => `<span class="bug-id me-1">#${block}</span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    const modal = new bootstrap.Modal(document.getElementById('bugDetailModal'));
+    modal.show();
+}
+  function updateBugStatus(bugId, newStatus) {
+    // You would implement this to call your Apps Script function
+    console.log(`Updating bug ${bugId} to status: ${newStatus}`);
+    // google.script.run.updateBugStatus(bugId, newStatus);
+  }
+
+  function renderMarkdownSafe(text) {
+    if (!text) return '';
+    // Escape HTML first to prevent injection
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Convert markdown links [text](url)
+    const withLinks = escaped.replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    // Line breaks
+    return withLinks.replace(/\n/g, '<br>');
+  }
+
+
+  function editBug(bugId) {
+    // You would implement this to open an edit form
+    console.log(`Editing bug ${bugId}`);
+  }
+
+  function getPriorityColor(priority) {
+    switch (priority) {
+      case 'high': return 'danger';
+      case 'medium': return 'warning';
+      case 'low': return 'success';
+      default: return 'secondary';
+    }
+  }
+
+  function getStatusColor(status) {
+    switch (status) {
+      case 'resolved': return 'success';
+      case 'in-progress': return 'primary';
+      case 'open': return 'warning';
+      case 'closed': return 'secondary';
+      default: return 'secondary';
+    }
+  }
+
+  function formatDate(dateString) {
+    if (!dateString) return 'Not set';
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  }
+
+  function showLoading(show) {
+    const spinner = document.getElementById('loadingSpinner');
+    const bugList = document.getElementById('bugList');
+    
+    if (show) {
+      spinner.style.display = 'block';
+      bugList.style.display = 'none';
+    } else {
+      spinner.style.display = 'none';
+      bugList.style.display = 'block';
+    }
+  }
+
+  function showError(message) {
+    // You can implement a toast notification or alert here
+    alert(message);
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+</script>
+
+
+
+function doGet(e) {  
+  // Handle URL parameters if needed
+  const page = e.parameter && e.parameter.page ? e.parameter.page : 'index';
+  
+  switch(page) {
+    case 'dashboard':
+      return HtmlService.createTemplateFromFile('dashboard').evaluate()
+        .setTitle('Dashboard - Workanizer')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    case 'reports':
+      return HtmlService.createTemplateFromFile('reports').evaluate()
+        .setTitle('Reports - Workanizer')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    default:
+      return HtmlService.createTemplateFromFile('index').evaluate()
+        .setTitle('Workanizer - Bug Tracking')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+}
+
+//--------------------------------------Buganiser API Function-----------------------------------------------------------------------------------//
+
+function getDashboardContent() {
+  try {
+    return HtmlService.createHtmlOutputFromFile('dashboard').getContent();
+  } catch (error) {
+    console.error('Error loading dashboard:', error);
+    throw new Error('Dashboard file not found or contains errors');
+  }
+}
+
+function getReportsContent() {
+  try {
+    return HtmlService.createHtmlOutputFromFile('reports').getContent();
+  } catch (error) {
+    console.error('Error loading reports:', error);
+    throw new Error('Reports file not found or contains errors');
+  }
+}
+
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+function fetchBugsFromHotlist(hotlistId) {
+  try {
+    const hotlist = BuganizerApp.getHotlist(hotlistId);
+    const bugs = hotlist.getBugs();
+    if (!bugs || bugs.length === 0) {
+      Logger.log('No bugs found in hotlist: ' + hotlistId);
+      return [];
+    }
+
+
+    const bugData = bugs.map(bug => {
+      // Map numeric priority to text representation
+      let priorityText;
+      switch (bug.getPriority()) {
+        case 0:
+          priorityText = 'P0';
+          break;
+        case 1:
+          priorityText = 'P1';
+          break;
+        case 2:
+          priorityText = 'P2';
+          break;
+        case 3:
+          priorityText = 'P3';
+          break;
+        case 4:
+          priorityText = 'P4';
+          break;
+        default:
+          priorityText = 'Unknown'; // Handle unexpected priority values
+      }
+
+      // Map numeric severity to text representation
+      let severityText;
+      switch (bug.getSeverity()) {
+        case 0:
+          severityText = 'S0';
+          break;
+        case 1:
+          severityText = 'S1';
+          break;
+        case 2:
+          severityText = 'S2';
+          break;
+        case 3:
+          severityText = 'S3';
+          break;
+        case 4:
+          severityText = 'S4';
+          break;
+        default:
+          severityText = 'Unknown'; // Handle unexpected severity values
+      }
+
+        // Get Custom fields values
+        const customFields = bug.getCustomFields();
+        const vertical = getCustomFieldValue(customFields, "1339391");
+        const eta = getCustomFieldValue(customFields, "1339419");
+        const project_status = getCustomFieldValue(customFields, "1339469");
+        // Get last comment
+        let lastComment = null;
+        const comments = bug.getContents();
+        if (comments && comments.length > 0) {
+          lastComment = comments[comments.length - 1];
+        }
+        addBugIdToSheet(bug.getId());
+
+      return {
+        id: bug.getId(),
+        priority: priorityText,
+        title: bug.getSummary(),
+        assignee: bug.getAssignee(),
+        collaborators: bug.getCollaborators(),
+        reporter: bug.getReporter(),
+        verifier: bug.getVerifier(),
+        severity: severityText, // Use the text representation
+        vertical: vertical,
+        eta: eta,
+        status: bug.getIssueStatus(),
+        project_status: project_status,
+        type: bug.getType(),
+        componentId: bug.getComponentId(),
+        createdTime: bug.getCreatedTime(),
+        modifiedTime: bug.getModifiedTime(),
+        hotlistIds: bug.getHotlistIds(),
+        blocking: bug.getBlocking(),
+        lastComment: lastComment,
+      };
+    });
+
+    Logger.log(bugData)
+    return bugData;
+
+  } catch (e) {
+    Logger.log('Error fetching bugs from hotlist ' + hotlistId + ': ' + e);
+    return null; // Or throw the error if you prefer
+  }
+}
+
+function getCustomFieldValue(customFields, fieldId) {
+  const customField = customFields.find(field => field.getId() === fieldId);
+  return customField ? customField.getValue() : null;
+}
+
+function getBugs() {
+  const myHotlistId = '7105037'; // Replace with your hotlist ID
+  const bugs = fetchBugsFromHotlist(myHotlistId);
+  return JSON.stringify(bugs);
+}
+
+//------------------------------Workaniser sheet functions-----------------------------------------------------------------------------------------//
+function getExistingBugIdsInSheet() {
+  const sheetUrl = "https://docs.google.com/spreadsheets/d/1JvHpEQzygAyGvZnXwwmRIsWlGn2X_9G-060JVb5A7Ow/edit?resourcekey=0-eGIBoeHlRHDRDqjPSAZjCQ&gid=0#gid=0";
+  
+  try {
+    const ss = SpreadsheetApp.openByUrl(sheetUrl);
+    const sheet = ss.getSheets()[0]; // Get the first sheet
+    let existingIds = [];
+
+    const data = sheet.getDataRange().getValues();
+    
+
+    const headers = data[0].map(h => h.toString().trim());
+    const bugIdColumnIndex = headers.indexOf("bug id");
+
+
+    for (let i = 1; i < data.length; i++) {
+      let bugId = data[i][bugIdColumnIndex];
+      if (bugId) {
+        bugId = String(bugId).trim();
+        existingIds.push(bugId);
+      } else {
+        console.log('Skipping empty ID:', bugId);
+      }
+    }
+
+    return { existingIds: existingIds};
+  } catch (e) {
+    Logger.log('Error reading from sheet: ' + e);
+    SpreadsheetApp.getUi().alert('Error reading from sheet: ' + e.message);
+    return { existingIds: new Set(), bugIdColumnIndex: -1 };
+  }
+}
+
+function addBugIdToSheet(bugIdToAdd) {
+  // Replace with your actual Spreadsheet ID and Sheet Name
+  const SPREADSHEET_ID = "1JvHpEQzygAyGvZnXwwmRIsWlGn2X_9G-060JVb5A7Ow"; // Extract from your URL
+  const SHEET_NAME = "BugDataImport"; // Or whatever your sheet tab is named
+  const BUG_ID_COLUMN_INDEX = 0; // Column A is 0, B is 1, etc. (0-indexed)
+
+  if (!bugIdToAdd) {
+    Logger.log("No Bug ID provided to add.");
+    return;
+  }
+
+  const bugIdStr = String(bugIdToAdd).trim();
+
+  try {
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = spreadsheet.getSheetByName(SHEET_NAME);
+
+    if (!sheet) {
+      Logger.log(`Error: Sheet with name '${SHEET_NAME}' not found.`);
+      SpreadsheetApp.getUi().alert(`Error: Sheet with name '${SHEET_NAME}' not found.`);
+      return;
+    }
+
+    const { existingIds } = getExistingBugIdsInSheet();
+
+    if (existingIds.includes(bugIdStr)) {
+      Logger.log(`Bug ID ${bugIdStr} already exists in the sheet.`);
+      return; // Already present
+    }
+
+    // Append the new Bug ID to the next empty row in the specified column
+    const lastRow = sheet.getLastRow();
+    // getRange(row, column, numRows, numColumns)
+    // We add 1 to BUG_ID_COLUMN_INDEX because getRange is 1-indexed for columns
+    sheet.getRange(lastRow + 1, BUG_ID_COLUMN_INDEX + 1, 1, 1).setValue(bugIdStr);
+    Logger.log(`Successfully added Bug ID ${bugIdStr} to '${SHEET_NAME}'.`);
+
+  } catch (e) {
+    Logger.log(`Error in addBugIdToSheet: ${e.message}`);
+    // Only show an alert if running in an environment where UI is available
+    if (typeof SpreadsheetApp.getUi !== 'undefined') {
+      try {
+        SpreadsheetApp.getUi().alert(`Error adding Bug ID ${bugIdStr}: ${e.message}`);
+      } catch (uiError) {
+        Logger.log('Could not display alert: ' + uiError);
+      }
+    }
+  }
+}
+
+function updateSheetByBugId(bugId, columnToUpdateName, newValue) {
+  const SPREADSHEET_ID = "1JvHpEQzygAyGvZn2X_9G-060JVb5A7Ow"; // Replace with your actual Spreadsheet ID
+  const SHEET_NAME = "BugDataImport"; // Or whatever your sheet tab is named
+  const BUG_ID_COLUMN_NAME = "Bug ID"; // Column header for Bug IDs (e.g., "Bug ID", "Ticket Number")
+
+  if (!bugId || !columnToUpdateName || typeof newValue === 'undefined' || newValue === null) {
+    Logger.log("Bug ID, column name to update, and a new value must all be provided.");
+    if (typeof SpreadsheetApp.getUi !== 'undefined') {
+      SpreadsheetApp.getUi().alert("Error: Bug ID, column name to update, and a new value must all be provided.");
+    }
+    return;
+  }
+
+  const bugIdStr = String(bugId).trim();
+  const newValueStr = String(newValue).trim(); // Ensure the new value is a string and trimmed
+
+  try {
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = spreadsheet.getSheetByName(SHEET_NAME);
+
+    if (!sheet) {
+      Logger.log(`Error: Sheet with name '${SHEET_NAME}' not found.`);
+      if (typeof SpreadsheetApp.getUi !== 'undefined') {
+        SpreadsheetApp.getUi().alert(`Error: Sheet with name '${SHEET_NAME}' not found.`);
+      }
+      return;
+    }
+
+    // Find the column index for Bug ID and the target update column dynamically
+    const bugIdColumnIndex = findColumnIndexByName(sheet, BUG_ID_COLUMN_NAME);
+    const targetColumnIndex = findColumnIndexByName(sheet, columnToUpdateName);
+
+    if (bugIdColumnIndex === -1) {
+      Logger.log(`Error: Column '${BUG_ID_COLUMN_NAME}' not found in the sheet.`);
+      if (typeof SpreadsheetApp.getUi !== 'undefined') {
+        SpreadsheetApp.getUi().alert(`Error: Column '${BUG_ID_COLUMN_NAME}' not found.`);
+      }
+      return;
+    }
+
+    if (targetColumnIndex === -1) {
+      Logger.log(`Error: Column '${columnToUpdateName}' not found in the sheet.`);
+      if (typeof SpreadsheetApp.getUi !== 'undefined') {
+        SpreadsheetApp.getUi().alert(`Error: Column '${columnToUpdateName}' not found. Cannot update.`);
+      }
+      return;
+    }
+
+    // Get existing bug IDs along with their row numbers using the dynamically found index
+    const { existingIds, idToRowMap } = getExistingBugIdsInSheet(sheet, bugIdColumnIndex);
+
+    if (!existingIds.includes(bugIdStr)) {
+      Logger.log(`Bug ID ${bugIdStr} not found in the sheet. Cannot update.`);
+      if (typeof SpreadsheetApp.getUi !== 'undefined') {
+        SpreadsheetApp.getUi().alert(`Bug ID ${bugIdStr} not found. Update not performed.`);
+      }
+      return;
+    }
+
+    const targetRow = idToRowMap[bugIdStr];
+    if (targetRow === undefined) {
+      Logger.log(`Internal error: Row for Bug ID ${bugIdStr} not found in map.`);
+      return;
+    }
+
+    sheet.getRange(targetRow, targetColumnIndex + 1).setValue(newValueStr);
+    Logger.log(`Successfully updated column '${columnToUpdateName}' for Bug ID ${bugIdStr} with value '${newValueStr}' in '${SHEET_NAME}'.`);
+
+  } catch (e) {
+    Logger.log(`Error in updateSheetByBugId: ${e.message}`);
+    if (typeof SpreadsheetApp.getUi !== 'undefined') {
+      try {
+        SpreadsheetApp.getUi().alert(`Error updating column '${columnToUpdateName}' for Bug ID ${bugIdStr}: ${e.message}`);
+      } catch (uiError) {
+        Logger.log('Could not display alert: ' + uiError);
+      }
+    }
+  }
+}
+
+function getExistingBugIdsInSheet(sheet, bugIdColumnIndex) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) { // Assuming header row, so no data rows or only header
+    return { existingIds: [], idToRowMap: {} };
+  }
+
+  // Get all data from the bug ID column, starting from the second row (skipping header)
+  const range = sheet.getRange(2, bugIdColumnIndex + 1, lastRow - 1, 1);
+  const values = range.getValues();
+
+  const existingIds = [];
+  const idToRowMap = {};
+
+  // Iterate through the values to populate existingIds and idToRowMap
+  // Remember that the range starts from row 2, so row numbers will be 1-indexed.
+  // The first element in 'values' corresponds to sheet row 2.
+  for (let i = 0; i < values.length; i++) {
+    const bugId = String(values[i][0]).trim();
+    if (bugId) { // Ensure the cell is not empty
+      existingIds.push(bugId);
+      idToRowMap[bugId] = i + 2; // +2 because array is 0-indexed and sheet is 1-indexed starting from row 2
+    }
+  }
+  return { existingIds, idToRowMap };
+}
+
+function addNewColumnHeader() {
+
+  const spreadsheetId = "1JvHpEQzygAyGvZn2X_9G-060JVb5A7Ow"; // Replace with your actual Spreadsheet ID
+  const sheetName = "BugDataImport"; // Or whatever your sheet tab is named
+  const newColumnName = "hello"
+  if (!spreadsheetId || !sheetName || !newColumnName) {
+    Logger.log("Error: Spreadsheet ID, sheet name, and new column name must be provided.");
+    if (typeof SpreadsheetApp.getUi !== 'undefined') {
+      SpreadsheetApp.getUi().alert("Error: Missing parameters to add new column header.");
+    }
+    return;
+  }
+
+  try {
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    const sheet = spreadsheet.getSheetByName(sheetName);
+
+    if (!sheet) {
+      Logger.log(`Error: Sheet with name '${sheetName}' not found.`);
+      if (typeof SpreadsheetApp.getUi !== 'undefined') {
+        SpreadsheetApp.getUi().alert(`Error: Sheet with name '${sheetName}' not found.`);
+      }
+      return;
+    }
+
+    // Find the first empty column in the header row (row 1)
+    const lastColumn = sheet.getLastColumn();
+    const headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+
+    let targetColumnIndex = lastColumn + 1; // Default to next column if no empty space in existing range
+    for (let i = 0; i < headers.length; i++) {
+      if (!headers[i] || String(headers[i]).trim() === '') {
+        targetColumnIndex = i + 1; // Found an empty cell in header row (1-indexed)
+        break;
+      }
+    }
+
+    // Set the new column name in the identified column
+    sheet.getRange(1, targetColumnIndex).setValue(newColumnName);
+
+    Logger.log(`Successfully added new column header '${newColumnName}' to column ${targetColumnIndex} in sheet '${sheetName}'.`);
+
+  } catch (e) {
+    Logger.log(`Error in addNewColumnHeader: ${e.message}`);
+    if (typeof SpreadsheetApp.getUi !== 'undefined') {
+      try {
+        SpreadsheetApp.getUi().alert(`Error adding column '${newColumnName}': ${e.message}`);
+      } catch (uiError) {
+        Logger.log('Could not display alert: ' + uiError);
+      }
+    }
+  }
+}
+
